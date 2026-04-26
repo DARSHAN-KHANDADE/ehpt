@@ -116,16 +116,36 @@ net.sniff on
 
 
 LAB 7
+Pre-setup (Run first)
 sudo apt update
 sudo apt install -y hydra hashcat john medusa wordlists
 sudo gunzip /usr/share/wordlists/rockyou.txt.gz
 sudo service ssh start
-hydra -l admin -P /usr/share/wordlists/rockyou.txt -t 4 -V 127.0.0.1 ssh
 echo -n "password123" | md5sum | awk '{print $1}' > hash.txt
+
+Hydra (Online SSH brute force)
+hydra -l admin -P /usr/share/wordlists/rockyou.txt -t 4 -V 127.0.0.1 ss
+
+John the Ripper (Offline hash cracking)
 john --wordlist=/usr/share/wordlists/rockyou.txt hash.txt
 john --show hash.txt
-hashcat -m 0 -a 0 --force hash.txt /usr/share/wordlists/rockyou.txt
+
+Hashcat (GPU hash cracking)
+hashcat -m 0 -a 0 hash.txt /usr/share/wordlists/rockyou.txt
+hashcat --show hash.txt
+
+Medusa (Online SSH brute force)
 medusa -h 127.0.0.1 -u admin -P /usr/share/wordlists/rockyou.txt -M ssh
+
+Extra Hashcat modes (for different hash types)
+# MD5 (mode 0)
+hashcat -m 0 -a 0 hash.txt /usr/share/wordlists/rockyou.txt
+
+# SHA1 (mode 100)
+hashcat -m 100 -a 0 hash.txt /usr/share/wordlists/rockyou.txt
+
+# SHA256 (mode 1400)
+hashcat -m 1400 -a 0 hash.txt /usr/share/wordlists/rockyou.txt
 
 
 
