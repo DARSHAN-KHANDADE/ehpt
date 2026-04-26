@@ -124,7 +124,7 @@ sudo service ssh start
 echo -n "password123" | md5sum | awk '{print $1}' > hash.txt
 
 Hydra (Online SSH brute force)
-hydra -l admin -P /usr/share/wordlists/rockyou.txt -t 4 -V 127.0.0.1 ss
+hydra -l admin -P /usr/share/wordlists/rockyou.txt -t 4 -V 127.0.0.1 ssh
 
 John the Ripper (Offline hash cracking)
 john --wordlist=/usr/share/wordlists/rockyou.txt hash.txt
@@ -132,7 +132,7 @@ john --show hash.txt
 
 Hashcat (GPU hash cracking)
 hashcat -m 0 -a 0 hash.txt /usr/share/wordlists/rockyou.txt
-hashcat --show hash.txt
+hashcat -m 0 hash.txt --show
 
 Medusa (Online SSH brute force)
 medusa -h 127.0.0.1 -u admin -P /usr/share/wordlists/rockyou.txt -M ssh
@@ -142,11 +142,16 @@ Extra Hashcat modes (for different hash types)
 hashcat -m 0 -a 0 hash.txt /usr/share/wordlists/rockyou.txt
 
 # SHA1 (mode 100)
-hashcat -m 100 -a 0 hash.txt /usr/share/wordlists/rockyou.txt
+echo -n "password123" | sha1sum | awk '{print $1}' > sha1_hash.txt
+cat sha1_hash.txt
+hashcat -m 100 -a 0 sha1_hash.txt /usr/share/wordlists/rockyou.txt
+hashcat -m 100 sha1_hash.txt --show
+
 
 # SHA256 (mode 1400)
-hashcat -m 1400 -a 0 hash.txt /usr/share/wordlists/rockyou.txt
-
+echo -n "password123" | sha256sum | awk '{print $1}' > sha256_hash.txt
+hashcat -m 1400 -a 0 sha256_hash.txt /usr/share/wordlists/rockyou.txt
+hashcat -m 1400 sha256_hash.txt --show
 
 
 LAB 8
@@ -156,7 +161,7 @@ echo -n "abc123" | md5sum
 echo -n "abc123" | sha1sum
 hashid e99a18c428cb38d5f260853678922e03
 cd /usr/share/rainbowcrack/
-sudo rtgen md5 loweralpha-numeric 1 6 0 1000 1000 0
+sudo rtgen md5 loweralpha-numeric 1 6 0 3800 3800000 0
 sudo rtsort .
 rcrack . -h e99a18c428cb38d5f260853678922e03
 python3 -c "import bcrypt; h=bcrypt.hashpw(b'password123', bcrypt.gensalt(rounds=12)); print(h)"
